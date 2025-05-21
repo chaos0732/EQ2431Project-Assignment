@@ -127,8 +127,47 @@ class MarkovChain:
     def initErgodic(self):
         pass
 
-    def forward(self):
-        pass
+    def forward(self, pX):
+        """
+        alpha_hat, c = forward(self, pX)
+        Forward algorithm for Markov Chain.
+        Input:
+        pX= matrix of size (nStates, nSamples)
+        pX(i,j)= P[X(j) | S(t)=i]
+
+        Result:
+        alpha_hat= matrix of size (nStates, nSamples)
+        alpha_hat(i,j)= P[S(t)=i | X(1:j)]
+        c= vector of size (nSamples)
+        c(j)= P[X(1:j)]
+        """
+        
+        # Initialize
+        nSamples = pX.shape[1]
+        alpha_hat = np.zeros((self.nStates, nSamples))
+        c = np.zeros(nSamples)
+        if self.is_finite:
+            A_square = self.A[:,:-1]  # Exclude the last column (END state)
+        else:
+            A_square = self.A
+
+        #t =1  
+        alpha_temp = self.q * pX[:, 0]
+        c[0] = np.sum(alpha_temp)
+        alpha_hat[:, 0] = alpha_temp / c[0]
+
+        #t = 2..nSamples
+        for t in range(1, nSamples):
+            alpha_temp = A_square.T @ alpha_hat[:, t-1] * pX[:, t]
+            c[t] = np.sum(alpha_temp)
+            alpha_hat[:, t] = alpha_temp / c[t] 
+        
+        # termination
+        if self.is_finite:
+            c= np.append(c, alpha_hat[:,-1] @ self.A[:,-1])
+        
+        #c = c/c[0] #normalize?
+        return alpha_hat, c
 
     def finiteDuration(self):
         pass
