@@ -14,16 +14,13 @@ mc = MarkovChain(q, A)
 h = HMM(mc, [g1, g2])
 
 x = np.array([-0.2, 2.6, 1.3])
-
 pX = np.vstack([g1.prob(x), g2.prob(x)])
-print("row sums:", np.sum(pX, axis=1))
-print("pX:\n", pX)
+print("px:\n", pX)
 
 alpha_hat, c = mc.forward(pX)
+print("c:", c)
 
-print("Alpha hat:\n", alpha_hat)
-print("C:\n", c)
+beta_hat = mc.backward(c, pX)
+print("beta_hat:", beta_hat)
 
-c_true = np.array([1,0.1625, 0.8266 , 0.0581])
-logp = np.sum(np.log(c_true))
-print("logp:", logp)
+

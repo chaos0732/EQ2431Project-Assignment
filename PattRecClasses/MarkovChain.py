@@ -166,14 +166,40 @@ class MarkovChain:
         if self.is_finite:
             c= np.append(c, alpha_hat[:,-1] @ self.A[:,-1])
         
-        #c = c/c[0] #normalize?
         return alpha_hat, c
 
     def finiteDuration(self):
         pass
     
-    def backward(self):
-        pass
+    def backward(self, c, pX):
+        """
+        beta_hat = backward(self, c, pX)
+        Backward algorithm for Markov Chain.
+        Input:
+        c= vector of size (nSamples)
+        c(j)= P[X(1:j)]
+        pX= matrix of size (nStates, nSamples)
+        pX(i,j)= P[X(j) | S(t)=i]
+        Result:
+        beta_hat= matrix of size (nStates, nSamples)
+        beta_hat(i,j)= P[X(j+1:nSamples) | S(t)=i]
+        """
+        #initializa
+        T = pX.shape[1]
+        beta_hat = np.zeros((self.nStates, T))
+
+        if self.is_finite:
+            A_square = self.A[:,:-1]
+            beta_hat[:,-1] = self.A[:,-1] /(c[T]*c[T-1])
+        else:
+            A_square = self.A
+            beta_hat[:,-1] = 1/c[-1]
+        
+        for t in range(T-2, -1, -1):
+            beta_hat[:, t] = A_square @ (beta_hat[:, t+1] * pX[:, t+1])
+            beta_hat[:, t] = beta_hat[:, t] / c[t]
+
+        return beta_hat
 
     def adaptStart(self):
         pass

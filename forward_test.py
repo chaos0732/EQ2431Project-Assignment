@@ -15,5 +15,14 @@ h = HMM(mc, [g1, g2])
 
 x = np.array([-0.2, 2.6, 1.3])
 
-logp = h.logprob(x)
+pX = np.vstack([g1.prob(x), g2.prob(x)])
+print("pX:\n", pX)
+
+alpha_hat, c = mc.forward(pX)
+
+print("Alpha hat:\n", alpha_hat)
+print("C:\n", c)
+
+
+logp = np.sum(np.log(c))
 print("logp:", logp)
